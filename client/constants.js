@@ -1,1 +1,1 @@
-export const currecyApiBase = 'https://openexchangerates.org/api';
+export const currecyApiBase = 'https://free.currconv.com/api/v7';
