@@ -60,6 +60,13 @@ const App = () => {
         setConversionFactor(Object.entries(data)[0][1]);
     };
 
+    const numericInput = parseFloat(input)
+    const formattedInput = numericInput.toLocaleString()
+    let formattedOutput
+    if (conversionFactor) {
+        formattedOutput = (conversionFactor * numericInput).toLocaleString()
+    }
+
     return (
         <>
             <Application >
@@ -88,7 +95,7 @@ const App = () => {
                             </form>
                             {!!conversionFactor && (
                                 // todo: pretty format converted no.
-                                <p>{input} {currency1} = {conversionFactor * input} {currency2}</p>
+                                <p>{formattedInput} {currency1} = {formattedOutput} {currency2}</p>
                             )}
                         </Wrapper>
                     )
