@@ -7,7 +7,7 @@ import { Application, Wrapper } from './styles';
 import { currecyApiBase, apiKey } from '../../constants';
 
 const App = () => {
-    const [currencies, setCurrencies] = useState({});
+    const [currencies, setCurrencies] = useState([]);
     const [loadingCurrencies, setLoadingCurrencies] = useState(true);
     const [input, setInput] = useState(1);
     const [currency1, setCurrency1] = useState('AUD');
@@ -21,12 +21,23 @@ const App = () => {
         setValue(value);
     };
 
+    // On component mount, grab the list of currencies from API
     useEffect(() => {
         const fetchCurrencies = async () => {
             const { data: { results } } = await axios.get(`${currecyApiBase}/currencies?apiKey=${apiKey}`);
 
+            const orderedCurrencies = Object.entries(results).sort((a, b) => {
+                if (a[1].currencyName < b[1].currencyName) {
+                    return -1;
+                }
+                if (a[1].currencyName > b[1].currencyName) {
+                    return 1;
+                }
+                return 0;
+            });
+
             setLoadingCurrencies(false);
-            setCurrencies(results);
+            setCurrencies(orderedCurrencies);
         };
 
         fetchCurrencies();
@@ -56,14 +67,14 @@ const App = () => {
                                 <input type="number" value={input} onChange={e => handleInputChange(e, setInput)} />
 
                                 <select value={currency1} onChange={e => handleInputChange(e, setCurrency1)}>
-                                    {Object.entries(currencies).map(currency => (
-                                        <option value={currency[1].id} key={currency[1].id}>{currency[1].currencyName}</option>
+                                    {currencies.map(currency => (
+                                        <option value={currency[0]} key={currency[0]}>{currency[1].currencyName}</option>
                                     ))}
                                 </select>
 
                                 <select value={currency2} onChange={e => handleInputChange(e, setCurrency2)}>
-                                    {Object.entries(currencies).map(currency => (
-                                        <option value={currency[1].id} key={currency[1].id}>{currency[1].currencyName}</option>
+                                    {currencies.map(currency => (
+                                        <option value={currency[0]} key={currency[0]}>{currency[1].currencyName}</option>
                                     ))}
                                 </select>
 
