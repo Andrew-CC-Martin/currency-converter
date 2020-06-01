@@ -4,22 +4,17 @@ import axios from 'axios';
 
 import GlobalStyle from '../theme';
 import { Application, Wrapper } from './styles';
+import { Button } from './components/button'
 import { currecyApiBase, apiKey } from '../../constants';
 
 const App = () => {
     const [currencies, setCurrencies] = useState([]);
     const [loadingCurrencies, setLoadingCurrencies] = useState(true);
+    const [loadingConversion, setLoadingConversion] = useState(false);
     const [input, setInput] = useState(1);
     const [currency1, setCurrency1] = useState('AUD');
     const [currency2, setCurrency2] = useState('USD');
     const [conversionFactor, setConversionFactor] = useState(0);
-
-    const handleInputChange = (e, setValue) => {
-        const { currentTarget: { value } } = e;
-        setConversionFactor(0);
-
-        setValue(value);
-    };
 
     // On component mount, grab the list of currencies from API
     useEffect(() => {
@@ -43,14 +38,25 @@ const App = () => {
         fetchCurrencies();
     }, []);
 
+    const handleInputChange = (e, setValue) => {
+        const { currentTarget: { value } } = e;
+        setConversionFactor(0);
+
+        setValue(value);
+    };
+
     const onClickConvert = async (e) => {
+        setLoadingConversion(true);
         e.preventDefault();
+
+        // If user clicks convert and no value is entered, just default it to 1
         if (!input) {
-            return
+            setInput(1);
         }
 
         const { data } = await axios.get(`${currecyApiBase}/convert?q=${currency1}_${currency2}&compact=ultra&apiKey=${apiKey}`);
 
+        setLoadingConversion(false);
         setConversionFactor(Object.entries(data)[0][1]);
     };
 
@@ -78,11 +84,10 @@ const App = () => {
                                     ))}
                                 </select>
 
-                                <button>
-                                    Convert
-                                </button>
+                                <Button loading={loadingConversion} />
                             </form>
                             {!!conversionFactor && (
+                                // todo: pretty format converted no.
                                 <p>{input} {currency1} = {conversionFactor * input} {currency2}</p>
                             )}
                         </Wrapper>
@@ -91,7 +96,7 @@ const App = () => {
             </Application>
             <GlobalStyle />
         </>
-    )
+    );
 };
 
 export default hot(App);
