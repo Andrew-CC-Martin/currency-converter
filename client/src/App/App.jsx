@@ -50,8 +50,8 @@ const App = () => {
     };
 
     const onClickConvert = async (e) => {
-        setLoadingConversion(true);
         e.preventDefault();
+        setLoadingConversion(true);
 
         // If user clicks convert and no value is entered, just default it to 1
         if (!input) {
