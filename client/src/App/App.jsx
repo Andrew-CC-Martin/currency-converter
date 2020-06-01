@@ -3,26 +3,22 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 import GlobalStyle from '../theme';
-import { Application } from './styles';
-import { currecyApiBase } from '../../constants';
-
-// note - I wouldn't normally put this into the code base, but it's needed to run the demo,
-// plus it's only for a free service so no real risk here
-const apiKey = 'c317eec24b56ebb0c145';
+import { Application, Wrapper } from './styles';
+import { currecyApiBase, apiKey } from '../../constants';
 
 const App = () => {
     const [currencies, setCurrencies] = useState({});
     const [loadingCurrencies, setLoadingCurrencies] = useState(true);
-    const [input, setInput] = useState(0);
+    const [input, setInput] = useState(1);
     const [currency1, setCurrency1] = useState('AUD');
     const [currency2, setCurrency2] = useState('USD');
     const [conversionFactor, setConversionFactor] = useState(0);
 
-    const handleInputChange = (e, setInput) => {
+    const handleInputChange = (e, setValue) => {
         const { currentTarget: { value } } = e;
         setConversionFactor(0);
 
-        setInput(value);
+        setValue(value);
     };
 
     useEffect(() => {
@@ -38,6 +34,9 @@ const App = () => {
 
     const onClickConvert = async (e) => {
         e.preventDefault();
+        if (!input) {
+            return
+        }
 
         const { data } = await axios.get(`${currecyApiBase}/convert?q=${currency1}_${currency2}&compact=ultra&apiKey=${apiKey}`);
 
@@ -52,7 +51,7 @@ const App = () => {
                 {loadingCurrencies
                     ? <p>loading currencies...</p>
                     : (
-                        <>
+                        <Wrapper>
                             <form onSubmit={onClickConvert}>
                                 <input type="number" value={input} onChange={e => handleInputChange(e, setInput)} />
 
@@ -75,7 +74,7 @@ const App = () => {
                             {!!conversionFactor && (
                                 <p>{input} {currency1} = {conversionFactor * input} {currency2}</p>
                             )}
-                        </>
+                        </Wrapper>
                     )
                 }
             </Application>

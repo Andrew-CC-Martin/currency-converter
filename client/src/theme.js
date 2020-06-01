@@ -20,6 +20,12 @@ const GlobalStyle = createGlobalStyle`
 
     input {
         margin: 5px;
+        padding: 10px;
+    }
+
+    select {
+        margin: 5px;
+        padding: 10px;
     }
 `;
 
