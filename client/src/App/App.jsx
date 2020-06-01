@@ -5,10 +5,12 @@ import axios from 'axios';
 import GlobalStyle from '../theme';
 import { Application, Wrapper } from './styles';
 import { Button } from './components/button'
+import { formatCurrency } from './utils'
 import { currecyApiBase, apiKey } from '../../constants';
 
 const App = () => {
-    const [currencies, setCurrencies] = useState([]);
+    const [currencies, setCurrencies] = useState({});
+    const [sortedCurrencies, setSortedCurrencies] = useState([]);
     const [loadingCurrencies, setLoadingCurrencies] = useState(true);
     const [loadingConversion, setLoadingConversion] = useState(false);
     const [input, setInput] = useState(1);
@@ -21,7 +23,8 @@ const App = () => {
         const fetchCurrencies = async () => {
             const { data: { results } } = await axios.get(`${currecyApiBase}/currencies?apiKey=${apiKey}`);
 
-            const orderedCurrencies = Object.entries(results).sort((a, b) => {
+            // Sort currencies list here so we only need to do it once
+            const sortedCurrencies = Object.entries(results).sort((a, b) => {
                 if (a[1].currencyName < b[1].currencyName) {
                     return -1;
                 }
@@ -32,7 +35,8 @@ const App = () => {
             });
 
             setLoadingCurrencies(false);
-            setCurrencies(orderedCurrencies);
+            setCurrencies(results);
+            setSortedCurrencies(sortedCurrencies);
         };
 
         fetchCurrencies();
@@ -60,12 +64,15 @@ const App = () => {
         setConversionFactor(Object.entries(data)[0][1]);
     };
 
-    const numericInput = parseFloat(input)
-    const formattedInput = numericInput.toLocaleString()
-    let formattedOutput
-    if (conversionFactor) {
-        formattedOutput = (conversionFactor * numericInput).toLocaleString()
+    // Format inputs and outputs with commas and currency symbols
+    const numericInput = parseFloat(input);
+    let currencySymbol1, currencySymbol2
+    if (sortedCurrencies.length > 0) {
+        currencySymbol1 = currencies[currency1].currencySymbol
+        currencySymbol2 = currencies[currency2].currencySymbol
     }
+    const formattedInput = formatCurrency(currencySymbol1, numericInput)
+    const formattedOutput = formatCurrency(currencySymbol2, (conversionFactor * numericInput))
 
     return (
         <>
@@ -80,13 +87,13 @@ const App = () => {
                                 <input type="number" value={input} onChange={e => handleInputChange(e, setInput)} />
 
                                 <select value={currency1} onChange={e => handleInputChange(e, setCurrency1)}>
-                                    {currencies.map(currency => (
+                                    {sortedCurrencies.map(currency => (
                                         <option value={currency[0]} key={currency[0]}>{currency[1].currencyName}</option>
                                     ))}
                                 </select>
 
                                 <select value={currency2} onChange={e => handleInputChange(e, setCurrency2)}>
-                                    {currencies.map(currency => (
+                                    {sortedCurrencies.map(currency => (
                                         <option value={currency[0]} key={currency[0]}>{currency[1].currencyName}</option>
                                     ))}
                                 </select>
@@ -94,7 +101,6 @@ const App = () => {
                                 <Button loading={loadingConversion} />
                             </form>
                             {!!conversionFactor && (
-                                // todo: pretty format converted no.
                                 <p>{formattedInput} {currency1} = {formattedOutput} {currency2}</p>
                             )}
                         </Wrapper>
