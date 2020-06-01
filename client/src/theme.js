@@ -19,7 +19,13 @@ const GlobalStyle = createGlobalStyle`
     }
 
     input {
-        margin: 5px;
+        margin: 10px;
+        padding: 10px;
+    }
+
+    select {
+        margin: 10px;
+        padding: 10px;
     }
 `;
 
